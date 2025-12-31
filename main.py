@@ -55,7 +55,39 @@ def main():
     # TODO: Agent configuration
 
     # TODO: Agent loop
+    max_iterations = 20
+    for _ in range(max_iterations):
+        # 1. Send the current conversation (messages) to the Gemini model
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=messages,
+            # config=config TBD
+        )
 
+        # 2. Check if the response is valid
+        if response is None or response.usage_metadata is None:
+            print("Response is malformed or missing usage metadata. Exiting...")
+            return sys.exit(1)
+
+        # 3. (Optional) Print verbose information if enabled
+        if args.verbose:
+            print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+            print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+
+        # 4. Add the model's response to the messages list
+        if response.candidates:
+            for candidate in response.candidates:
+                if candidate and candidate.content:
+                    messages.append(candidate.content)
+
+        # 5. Handle function calls if present. If not, print the final answer and exit.
+        if response.function_calls:
+            for function_call_part in response.function_calls:
+                result = "" # TODO: Call the function and return the result
+                messages.append(types.Content(role="assistant", parts=[types.Part(text=result)]))
+        else:
+            print(response.text)
+            return
 
 
 if __name__ == "__main__":
