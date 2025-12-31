@@ -19,10 +19,20 @@ def main():
     Exits:
         System exits with code 0 on success, 1 on failure.
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("prompt", type=str, help="The user's prompt message.")
+    # Use argument parser for command-line arguments
+    parser = argparse.ArgumentParser(
+        description="Run the Helper Agent conversation loop.",
+        usage='uv run main.py "User Prompt" [--verbose]'
+    )
+    parser.add_argument("user_prompt", type=str, help="The user's prompt message.")
     parser.add_argument("--verbose", action="store_true", help="Enabled detailed output.")
     args = parser.parse_args()
+
+    # Check if the prompt is empty or only whitespace
+    if not args.user_prompt.strip():
+        parser.print_usage()
+        print("Error: The User Prompt cannot be empty.")
+        sys.exit(1)
 
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
