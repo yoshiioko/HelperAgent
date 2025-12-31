@@ -34,10 +34,14 @@ def main():
         print("Error: The User Prompt cannot be empty.")
         sys.exit(1)
 
+    # Load environment variables from .env file
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
+
+    # Initialize Gemini API Client with API key
     client = Client(api_key=api_key)
 
+    # Define a System Prompt for the agent
     system_prompt = """
     ...
     """
