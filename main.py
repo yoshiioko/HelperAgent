@@ -7,8 +7,10 @@ import sys
 import argparse
 from dotenv import load_dotenv
 from google.genai import Client, types
-from functions.get_file_content import GetFileContentTool
 from functions.call_function import call_function
+from functions.tool_registry import get_tool_schemas
+from agent.system_prompt import system_prompt
+from agent.config import MODEL_NAME, MAX_ITERATIONS
 
 def main():
     """
@@ -44,31 +46,11 @@ def main():
     # Initialize Gemini API Client with an API key
     client = Client(api_key=api_key)
 
-    # Define a System Prompt for the agent
-    system_prompt = """
-    You are a helpful, concise, and proactive AI coding agent.
-
-    Your primary role is to assist users with coding tasks by planning and executing function calls. For each user request, break down the task into clear, logical steps and use available tools to perform operations such as:
-
-    - Listing files and directories
-    - Reading the content of a file
-    - Writing to a file (create or update)
-    - Running a Python file with optional arguments
-
-    When a user refers to the 'code project', they mean the current working directory. Always start by examining the project's files, understanding how to run the project and its tests, and verifying that everything works as expected.
-
-    All file paths should be relative to the working directory. Do not include the working directory in your function calls; it is automatically handled for security.
-
-    If an operation fails or is ambiguous, inform the user and suggest next steps. Always check for available tools before responding, as new tools may be added.
-
-    When appropriate, confirm actions with the user and summarize results clearly. Your responses should be accurate, actionable, and easy to follow.
-    """
-
     # Create the initial messages list with the user's prompt
     messages = [types.Content(role="user", parts=[types.Part(text=user_prompt)])]
 
-    # Tool setup: collect all tool schemas
-    tool_schemas = [GetFileContentTool.schema()]
+    # Tool setup: collect all tool schemas from the registry
+    tool_schemas = get_tool_schemas()
 
     # Agent configuration: register tool schemas with Gemini
     available_functions = types.Tool(function_declarations=tool_schemas)
@@ -78,11 +60,10 @@ def main():
     )
 
     # Agent loop
-    max_iterations = 20
-    for _ in range(max_iterations):
+    for _ in range(MAX_ITERATIONS):
         # 1. Send the current conversation (messages) to the Gemini model
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=MODEL_NAME,
             contents=messages,
             config=config
         )
