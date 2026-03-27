@@ -23,3 +23,7 @@ def list_tools():
     """List all registered tool names."""
     return list(TOOL_REGISTRY.keys())
 
+
+def get_tool_schemas():
+    """Return a list of all registered tool schemas."""
+    return [tool.schema() for tool in TOOL_REGISTRY.values()]
