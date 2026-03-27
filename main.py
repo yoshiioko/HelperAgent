@@ -7,6 +7,8 @@ import sys
 import argparse
 from dotenv import load_dotenv
 from google.genai import Client, types
+from functions.get_file_content import GetFileContentTool
+from functions.call_function import call_function
 
 def main():
     """
@@ -65,18 +67,24 @@ def main():
     # Create the initial messages list with the user's prompt
     messages = [types.Content(role="user", parts=[types.Part(text=user_prompt)])]
 
-    # TODO: Tool setup
+    # Tool setup: collect all tool schemas
+    tool_schemas = [GetFileContentTool.schema()]
 
-    # TODO: Agent configuration
+    # Agent configuration: register tool schemas with Gemini
+    available_functions = types.Tool(function_declarations=tool_schemas)
+    config = types.GenerateContentConfig(
+        tools=[available_functions],
+        system_instruction=system_prompt
+    )
 
-    # TODO: Agent loop
+    # Agent loop
     max_iterations = 20
     for _ in range(max_iterations):
         # 1. Send the current conversation (messages) to the Gemini model
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=messages,
-            # config=config TBD
+            config=config
         )
 
         # 2. Check if the response is valid
@@ -98,8 +106,11 @@ def main():
         # 5. Handle function calls if present. If not, print the final answer and exit.
         if response.function_calls:
             for function_call_part in response.function_calls:
-                result = "" # TODO: Call the function and return the result
-                messages.append(types.Content(role="assistant", parts=[types.Part(text=result)]))
+                tool_response = call_function(
+                    function_call_part,
+                    verbose=args.verbose
+                )
+                messages.append(tool_response)
         else:
             print(response.text)
             return
