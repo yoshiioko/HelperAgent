@@ -4,13 +4,16 @@ Add new tools here as you implement them.
 """
 
 from functions.get_file_content import GetFileContentTool
+from functions.get_file_properties import GetFilePropertiesTool
 
 # Instantiate tool objects
 get_file_content_tool = GetFileContentTool()
+get_file_properties_tool = GetFilePropertiesTool()
 
 # Central registry of tools by name
 TOOL_REGISTRY = {
     get_file_content_tool.name: get_file_content_tool,
+    get_file_properties_tool.name: get_file_properties_tool,
     # Add more tools here as you implement them
 }
 
