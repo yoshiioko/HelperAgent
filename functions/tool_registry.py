@@ -6,17 +6,20 @@ Add new tools here as you implement them.
 from functions.get_file_content import GetFileContentTool
 from functions.get_file_properties import GetFilePropertiesTool
 from functions.write_file import WriteFileTool
+from functions.list_files import ListFilesTool
 
 # Instantiate tool objects
 get_file_content_tool = GetFileContentTool()
 get_file_properties_tool = GetFilePropertiesTool()
 write_file_tool = WriteFileTool()
+list_files_tool = ListFilesTool()
 
 # Central registry of tools by name
 TOOL_REGISTRY = {
     get_file_content_tool.name: get_file_content_tool,
     get_file_properties_tool.name: get_file_properties_tool,
     write_file_tool.name: write_file_tool,
+    list_files_tool.name: list_files_tool,
     # Add more tools here as you implement them
 }
 
